@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#c0392b">
+  <title>Scanner — Controle de Depósito</title>
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Estilos mínimos para garantir layout fullscreen e mira funcional sem depender do css externo -->
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body.scanner-page { background: #000; color: #fff; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+    .scanner-container { position: relative; height: 100vh; width: 100%; overflow: hidden; }
+    #video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
+
+    /* Mira centralizada 200x200px com borda vermelha */
+    .crosshair { position: absolute; width: 200px; height: 200px; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 3px solid #c0392b; box-sizing: border-box; pointer-events: none; border-radius: 6px; }
+
+    /* Caixa de detecção (inicialmente oculta) */
+    #detection-box { position: absolute; border: 2px dashed #fff; background: rgba(0,0,0,0.25); box-sizing: border-box; }
+    .hidden { display: none !important; }
+
+    /* Painel inferior fixo */
+    .bottom-panel { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px; background: rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 8px; }
+    .status-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    #ai-status { font-weight: 600; }
+
+    .equipment-info { display: flex; gap: 8px; align-items: center; }
+    .equipment-info input { flex: 1; padding: 8px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; }
+    .confidence { min-width: 64px; text-align: right; }
+
+    .controls { display: flex; gap: 8px; }
+    .controls .btn { flex: 1; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; border-radius: 8px; color: #fff; text-decoration: none; border: none; }
+    #btn-entrada { background: #27ae60; }
+    #btn-saida { background: #c0392b; }
+    #btn-capture { background: #34495e; }
+
+    .back-link { position: absolute; top: 12px; left: 12px; color: #fff; text-decoration: none; background: rgba(0,0,0,0.4); padding: 8px 10px; border-radius: 6px; }
+
+    /* Responsivo: garantir botões grandes em telas pequenas */
+    @media (max-width: 480px) {
+      .crosshair { width: 180px; height: 180px; }
+      .controls .btn { font-size: 18px; }
+    }
+
+    /* Utility: esconder elementos visualmente mantendo acessibilidade */
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+  </style>
+</head>
+<body class="scanner-page">
+
+  <a class="back-link" href="index.html" aria-label="Voltar">← Voltar</a>
+
+  <main class="scanner-container" role="main">
+    <!-- Visor da câmera -->
+    <video id="video" autoplay playsinline></video>
+
+    <!-- Mira central -->
+    <div class="crosshair" aria-hidden="true"></div>
+
+    <!-- Caixa de detecção usada pela lógica; começa oculta -->
+    <div id="detection-box" class="hidden" aria-hidden="true"></div>
+
+    <!-- Painel inferior com status, info do equipamento e controles -->
+    <div class="bottom-panel" role="region" aria-label="Painel de controle">
+      <div class="status-row">
+        <span id="ai-status">🔍 Aguardando equipamento...</span>
+        <span id="signal" aria-hidden="true"></span>
+      </div>
+
+      <div id="equipment-info" class="equipment-info hidden">
+        <label for="equip-name" class="sr-only">Nome do equipamento</label>
+        <input id="equip-name" type="text" placeholder="Nome do equipamento" aria-label="Nome do equipamento">
+        <span id="confidence" class="confidence">--%</span>
+      </div>
+
+      <div class="controls">
+        <button id="btn-entrada" class="btn" disabled aria-disabled="true">✅ ENTRADA</button>
+        <button id="btn-saida" class="btn" disabled aria-disabled="true">❌ SAÍDA</button>
+      </div>
+
+      <div>
+        <button id="btn-capture" class="btn" style="width:100%">📸 Capturar para análise</button>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="js/scanner.js"></script>
+</body>
+</html>
